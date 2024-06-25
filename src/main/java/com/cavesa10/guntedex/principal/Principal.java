@@ -6,9 +6,7 @@ import com.cavesa10.guntedex.service.ConsumoAPI;
 import com.cavesa10.guntedex.service.ConvierteDatos;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -25,12 +23,16 @@ public class Principal {
         var option = -1;
         while (option != 0) {
             var menu = """
+                                        
+                    Seleccione una opción que desea:
+                                        
                     1 - Buscar libro por titulo
                     2 - Listar libros registrados
                     3 - Listar autores registrados
                     4 - Listar autores vivos en un determinado año
                     5 - Listar libros por idioma
                     0 - Salir
+                                        
                     """;
             System.out.println(menu);
             option = sc.nextInt();
@@ -40,18 +42,17 @@ public class Principal {
                     buscarLibroTitulo();
                     break;
                 case 2:
-                    System.out.println("No hay nada :D");
+                    listarLibros();
                     break;
                 case 3:
-                    System.out.println("No hay nada3 :D");
+                    listarAutores();
                     break;
                 case 4:
-                    System.out.println("No hay nada4 :D");
+                    listarAutoresVivos();
                     break;
                 case 5:
-                    System.out.println("No hay nada5 :D");
+                    listarLibrosPorIdioma();
                     break;
-
                 case 0:
                     System.out.println("Cerrando la aplicación Guntedex");
                     break;
@@ -83,9 +84,72 @@ public class Principal {
             } catch (DataIntegrityViolationException e) {
                 System.out.println("Error: Ya existe un libro con el título '" + tituloLibro + "' en la base de datos.");
             }
-//            repositorio.save(autorBuscado);
         } else {
             System.out.println("Libro no encontrado: " + libroBuscado);
+        }
+    }
+
+    private void listarLibros() {
+        List<Libro> listLibros = repositorio.listarLibros();
+        listLibros.forEach(l -> System.out.println("------ Libros ------" +
+                "\nTítulo: " + l.getTitulo() +
+                "\nAutor: " + l.getAutor().getNombre() +
+                "\nIdioma: " + l.getIdiomas().getIdioma() + " - " + l.getIdiomas().getLenguajeAPI() +
+                "\nDescargas: " + l.getDescarga() +
+                "\n-------------------"));
+        System.out.println("Presione la tecla Enter para continuar");
+        sc.nextLine();
+    }
+
+    private void listarAutores() {
+        List<Author> listaAutores = repositorio.findAll();
+        System.out.println(listaAutores.toString());
+        System.out.println("Presione la tecla Enter para continuar");
+        sc.nextLine();
+    }
+
+    private void listarAutoresVivos() {
+        System.out.println("Ingrese el año vivo del autor(es) que desea buscar");
+        var yearBuscado = sc.nextInt();
+        Optional<List<Author>> listaAutoresVivos = Optional.ofNullable(repositorio.listarAutoresVivos(yearBuscado));
+        List<Author> autoresVivos = listaAutoresVivos.orElse(Collections.emptyList());
+        if (autoresVivos.isEmpty()) {
+//        System.out.println(listaAutoresVivos.toString());
+            System.out.println("No se encontraron autores vivos en el año " + yearBuscado);
+            sc.nextLine();
+        } else {
+            autoresVivos.forEach(a -> System.out.println(a.toString()));
+            sc.nextLine();
+        }
+    }
+
+    private void listarLibrosPorIdioma() {
+        var submenu = true;
+        while (submenu) {
+            System.out.println("""
+                    Seleccione el idioma de los libros a buscar:
+                       
+                        en - English
+                        es - Spanish
+                        fr - French
+                        it - Italian
+                        pt - Portuguese
+                                  
+                    """);
+            Optional<Lenguaje> idomasc = Lenguaje.comprobar(sc.nextLine());
+            if (idomasc.isPresent()) {
+                Lenguaje idioma = idomasc.get();
+                System.out.println(idioma);
+                List<Libro> listLibros = repositorio.listarLibrosPorIdiomas(idioma);
+                if (listLibros.isEmpty()) {
+                    System.out.println("No hay libros con el idioma: " + idomasc.get());
+                }else {
+                    listLibros.forEach(l -> System.out.println(l.toString()));
+                }
+                submenu = false;
+            }else {
+                System.out.println("Opción Invalida");
+            }
         }
     }
 

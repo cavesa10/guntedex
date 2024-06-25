@@ -40,13 +40,14 @@ public class Libro {
 
     @Override
     public String toString() {
-        return "Libro{" +
-                "id=" + id +
-                ", titulo='" + titulo + '\'' +
-                ", idiomas=" + idiomas +
-                ", descarga=" + descarga +
-                ", autor=" + autor +
-                '}';
+        return
+                "***********************" +
+                        "\nLibro\n" +
+                        "\n\tTitulo:  " + titulo +
+                        "\n\tIdioma: " + idiomas +
+                        "\n\tDescargas:" + descarga +
+                        "\n\tAutor:   " + autor.getNombre() +
+                        '}';
     }
 
     public Long getId() {
@@ -64,8 +65,6 @@ public class Libro {
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
-
-
 
 
     public Integer getDescarga() {
